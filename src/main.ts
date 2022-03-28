@@ -1,5 +1,7 @@
 import { Container, ContainerModule, interfaces } from 'inversify';
 import { App } from './app';
+import { UserController } from './controllers/user/user.controller';
+import { IUserController } from './controllers/user/user.controller.interface';
 import { ConfigService } from './services/config/config.service';
 import { IConfig } from './services/config/config.service.interface';
 import { ILogger } from './services/logger/logger.interface';
@@ -9,6 +11,7 @@ import { TYPES } from './types';
 const appBindings = new ContainerModule((bind: interfaces.Bind) => {
 	bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
 	bind<IConfig>(TYPES.IConfig).to(ConfigService).inSingletonScope();
+	bind<IUserController>(TYPES.UserController).to(UserController);
 	bind<App>(TYPES.Application).to(App);
 });
 const bootstrap = async (): Promise<void> => {
