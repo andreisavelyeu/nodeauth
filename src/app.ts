@@ -1,12 +1,15 @@
 import express, { Express } from 'express';
-import { Server } from 'http';
+import cookieParser from 'cookie-parser';
 import { json } from 'body-parser';
+import { Server } from 'http';
+import cors from 'cors';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { UserController } from './controllers/user/user.controller';
 import { IConfig } from './services/config/config.service.interface';
 import { ILogger } from './services/logger/logger.interface';
 import { TYPES } from './types';
+import { MongoService } from './services/mongo/mongo.service';
 
 @injectable()
 export class App {
@@ -18,6 +21,7 @@ export class App {
 		@inject(TYPES.ILogger) private logger: ILogger,
 		@inject(TYPES.IConfig) private config: IConfig,
 		@inject(TYPES.UserController) private userController: UserController,
+		@inject(TYPES.MongoService) private mongoService: MongoService,
 	) {
 		this.app = express();
 		this.port = Number(this.config.get('PORT')) || 5000;
@@ -25,6 +29,8 @@ export class App {
 
 	useMiddleware(): void {
 		this.app.use(json());
+		this.app.use(cookieParser());
+		this.app.use(cors());
 	}
 
 	useRoutes(): void {
@@ -34,6 +40,7 @@ export class App {
 	public async init(): Promise<void> {
 		this.useMiddleware();
 		this.useRoutes();
+		await this.mongoService.connect();
 		this.server = this.app.listen(this.port, () => {
 			this.logger.log(`Server is running on port ${this.port}`);
 		});
