@@ -4,9 +4,10 @@ import { ILogger } from '../logger/logger.interface';
 import 'reflect-metadata';
 import mongoose from 'mongoose';
 import { IConfig } from '../config/config.service.interface';
+import { IMongoService } from './mongo.service.interface';
 
 @injectable()
-export class MongoService {
+export class MongoService implements IMongoService {
 	constructor(
 		@inject(TYPES.ILogger) private loggerService: ILogger,
 		@inject(TYPES.IConfig) private configService: IConfig,

@@ -6,7 +6,4 @@ export class UserRegisterDto {
 
 	@IsString({ message: "Password can't be blank" })
 	password: string;
-
-	@IsString({ message: "Name can't be blank" })
-	name: string;
 }

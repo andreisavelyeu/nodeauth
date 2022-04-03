@@ -21,7 +21,7 @@ export class App {
 		@inject(TYPES.ILogger) private logger: ILogger,
 		@inject(TYPES.IConfig) private config: IConfig,
 		@inject(TYPES.UserController) private userController: UserController,
-		@inject(TYPES.MongoService) private mongoService: MongoService,
+		@inject(TYPES.IMongoService) private mongoService: MongoService,
 	) {
 		this.app = express();
 		this.port = Number(this.config.get('PORT')) || 5000;
