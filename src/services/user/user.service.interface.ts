@@ -7,4 +7,5 @@ export interface Registration {
 }
 export interface IUserService {
 	register(email: string, password: string): Promise<Registration>;
+	activate(activationLink: string): Promise<void>;
 }

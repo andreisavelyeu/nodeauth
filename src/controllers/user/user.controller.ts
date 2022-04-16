@@ -9,12 +9,14 @@ import { ValidateMiddleware } from '../../middlewares/validate/validate.middlewa
 import { UserRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { IUserService } from '../../services/user/user.service.interface';
+import { IConfig } from '../../services/config/config.service.interface';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
 	constructor(
 		@inject(TYPES.ILogger) private loggerService: ILogger,
 		@inject(TYPES.IUserService) private userService: IUserService,
+		@inject(TYPES.IConfig) private configService: IConfig,
 	) {
 		super(loggerService);
 		this.bindRoutes([
@@ -59,8 +61,14 @@ export class UserController extends BaseController implements IUserController {
 		}
 	}
 
-	activate({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		// TODO handle registration activation
+	async activate(req: Request, res: Response, next: NextFunction): Promise<void> {
+		const { link } = req.params;
+		try {
+			await this.userService.activate(link);
+			res.redirect(this.configService.get('CLIENT_APP_URL'));
+		} catch (e) {
+			next(e);
+		}
 	}
 
 	refreshToken(

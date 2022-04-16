@@ -34,7 +34,7 @@ export class UserService implements IUserService {
 		const newUser = await UserModel.create({ email, password: hashedPassword, activationLink });
 		await this.mailService.sendActivationMail(
 			email,
-			`${this.configService.get('API_URL')}/user/activate/${activationLink}`,
+			`${this.configService.get('API_URL')}/users/activate/${activationLink}`,
 		);
 		const userEntity = new UserEntity(newUser);
 		const tokens = this.tokenService.generateTokens({ ...userEntity });
@@ -44,5 +44,17 @@ export class UserService implements IUserService {
 			...tokens,
 			user: userEntity,
 		};
+	}
+
+	async activate(activationLink: string): Promise<void> {
+		const user = await UserModel.findOne({ activationLink });
+
+		if (!user) {
+			throw new HTTPError('Activation link is incorrect', 400, 'UserService activation link');
+		}
+
+		user.isActivated = true;
+		await user.save();
+		this.loggerService.log(`[UserService] account has been activated successfully`);
 	}
 }
