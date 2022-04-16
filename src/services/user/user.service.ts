@@ -10,6 +10,7 @@ import { IMailService } from '../mail/mail.service.interface';
 import { ITokenService } from '../token/token.service.interface';
 import { UserEntity } from './user.entity';
 import { IConfig } from '../config/config.service.interface';
+import { HTTPError } from '../../exceptions/http-error.class';
 
 @injectable()
 export class UserService implements IUserService {
@@ -25,7 +26,7 @@ export class UserService implements IUserService {
 		const registeredUser = await UserModel.findOne({ email });
 
 		if (registeredUser) {
-			throw new Error(`User with the ${email} is already registered`);
+			throw new HTTPError(`User with the ${email} is already registered`, 409, 'UserService');
 		}
 
 		const hashedPassword = await this.hashService.hashPassword(password);

@@ -55,9 +55,7 @@ export class UserController extends BaseController implements IUserController {
 			});
 			this.send(res, 201, user);
 		} catch (e) {
-			if (e instanceof Error) {
-				this.loggerService.log(`[UserController] registration error ${e.message}`);
-			}
+			next(e);
 		}
 	}
 

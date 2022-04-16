@@ -8,4 +8,5 @@ export const TYPES = {
 	IHashService: Symbol.for('IHashService'),
 	IMailService: Symbol.for('IMailService'),
 	ITokenService: Symbol.for('ITokenService'),
+	IExceptionFilter: Symbol.for('IExceptionFilter'),
 };

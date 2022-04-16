@@ -2,6 +2,8 @@ import { Container, ContainerModule, interfaces } from 'inversify';
 import { App } from './app';
 import { UserController } from './controllers/user/user.controller';
 import { IUserController } from './controllers/user/user.controller.interface';
+import { ExceptionFilter } from './exceptions/exception.filter';
+import { IExceptionFilter } from './exceptions/exception.filter.interface';
 import { ConfigService } from './services/config/config.service';
 import { IConfig } from './services/config/config.service.interface';
 import { HashService } from './services/hash/hash.service';
@@ -21,6 +23,7 @@ const appBindings = new ContainerModule((bind: interfaces.Bind) => {
 	bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
 	bind<IConfig>(TYPES.IConfig).to(ConfigService).inSingletonScope();
 	bind<MongoService>(TYPES.IMongoService).to(MongoService).inSingletonScope();
+	bind<IExceptionFilter>(TYPES.IExceptionFilter).to(ExceptionFilter);
 	bind<IHashService>(TYPES.IHashService).to(HashService);
 	bind<IMailService>(TYPES.IMailService).to(MailService);
 	bind<ITokenService>(TYPES.ITokenService).to(TokenService);
