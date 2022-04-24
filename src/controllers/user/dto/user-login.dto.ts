@@ -5,5 +5,5 @@ export class UserLoginDto {
 	email: string;
 
 	@IsString({ message: "Password can't be blank" })
-	pasword: string;
+	password: string;
 }

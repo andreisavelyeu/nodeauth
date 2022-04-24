@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { v4 } from 'uuid';
 import { TYPES } from '../../types';
 import { ILogger } from '../logger/logger.interface';
-import { IUserService, Registration } from './user.service.interface';
+import { IUserService, UserAndTokens } from './user.service.interface';
 import 'reflect-metadata';
 import UserModel from '../../models/user/user.model';
 import { IHashService } from '../hash/hash.service.interface';
@@ -11,6 +11,8 @@ import { ITokenService } from '../token/token.service.interface';
 import { UserEntity } from './user.entity';
 import { IConfig } from '../config/config.service.interface';
 import { HTTPError } from '../../exceptions/http-error.class';
+import userModel from '../../models/user/user.model';
+import { JwtPayload } from 'jsonwebtoken';
 
 @injectable()
 export class UserService implements IUserService {
@@ -22,7 +24,33 @@ export class UserService implements IUserService {
 		@inject(TYPES.IConfig) private configService: IConfig,
 	) {}
 
-	async register(email: string, password: string): Promise<Registration> {
+	async login(email: string, password: string): Promise<UserAndTokens> {
+		const user = await UserModel.findOne({ email });
+		if (!user) {
+			throw new HTTPError(`Incorrect email or password`, 401, 'UserService');
+		}
+
+		const isPasswordCorrect = await this.hashService.compare(password, user.password);
+
+		if (!isPasswordCorrect) {
+			throw new HTTPError(`Incorrect email or password`, 401, 'UserService');
+		}
+
+		const userEntity = new UserEntity(user);
+		const tokens = this.tokenService.generateTokens({ ...userEntity });
+		await this.tokenService.saveToken(userEntity.id, tokens.refreshToken);
+
+		return {
+			...tokens,
+			user: userEntity,
+		};
+	}
+
+	async logout(refreshToken: string): Promise<void> {
+		await this.tokenService.removeToken(refreshToken);
+	}
+
+	async register(email: string, password: string): Promise<UserAndTokens> {
 		const registeredUser = await UserModel.findOne({ email });
 
 		if (registeredUser) {
@@ -56,5 +84,46 @@ export class UserService implements IUserService {
 		user.isActivated = true;
 		await user.save();
 		this.loggerService.log(`[UserService] account has been activated successfully`);
+	}
+
+	async refreshToken(refreshToken: string): Promise<UserAndTokens> {
+		if (!refreshToken) {
+			throw new HTTPError(
+				'You are not authorized to see this page',
+				401,
+				'UserService refresh token',
+			);
+		}
+
+		const tokenData = this.tokenService.validateRefreshToken(refreshToken);
+		const tokenDataDb = await this.tokenService.findRefreshToken(refreshToken);
+
+		if (!tokenData || !tokenDataDb) {
+			throw new HTTPError(
+				'You are not authorized to see this page',
+				401,
+				'UserService refresh token',
+			);
+		}
+
+		const user = await UserModel.findById((tokenData as JwtPayload).id);
+
+		if (!user) {
+			throw new HTTPError(
+				'You are not authorized to see this page',
+				401,
+				'UserService refresh token',
+			);
+		}
+
+		const userEntity = new UserEntity(user);
+
+		const tokens = this.tokenService.generateTokens({ ...userEntity });
+		await this.tokenService.saveToken(userEntity.id, tokens.refreshToken);
+
+		return {
+			...tokens,
+			user: userEntity,
+		};
 	}
 }

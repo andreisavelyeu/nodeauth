@@ -34,12 +34,35 @@ export class UserController extends BaseController implements IUserController {
 		]);
 	}
 
-	login(req: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): void {
-		// TODO handle authentication
+	async login(
+		{ body }: Request<{}, {}, UserLoginDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const { email, password } = body;
+
+		try {
+			const user = await this.userService.login(email, password);
+			res.cookie('refreshToken', user.refreshToken, {
+				maxAge: 30 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+			});
+			this.send(res, 200, user);
+		} catch (e) {
+			next(e);
+		}
 	}
 
-	logout({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		// TODO handle logout
+	logout({ cookies }: Request, res: Response, next: NextFunction): void {
+		const { refreshToken } = cookies;
+
+		try {
+			this.userService.logout(refreshToken);
+			res.clearCookie('refreshToken');
+			this.send(res, 200, '');
+		} catch (e) {
+			next(e);
+		}
 	}
 
 	async register(
@@ -71,12 +94,18 @@ export class UserController extends BaseController implements IUserController {
 		}
 	}
 
-	refreshToken(
-		{ body }: Request<{}, {}, UserRegisterDto>,
-		res: Response,
-		next: NextFunction,
-	): void {
-		// TODO handle refreshToken
+	async refreshToken({ cookies }: Request, res: Response, next: NextFunction): Promise<void> {
+		const { refreshToken } = cookies;
+		try {
+			const user = await this.userService.refreshToken(refreshToken);
+			res.cookie('refreshToken', user.refreshToken, {
+				maxAge: 30 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+			});
+			this.send(res, 200, user);
+		} catch (e) {
+			next(e);
+		}
 	}
 
 	getUsers({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {

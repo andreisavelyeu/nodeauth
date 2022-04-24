@@ -20,4 +20,8 @@ export class HashService implements IHashService {
 			}
 		}
 	}
+
+	async compare(password: string, existUserPassword: string): Promise<boolean> {
+		return await bcrypt.compare(password, existUserPassword);
+	}
 }

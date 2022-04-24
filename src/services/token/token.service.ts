@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
 import { ILogger } from '../logger/logger.interface';
@@ -39,5 +39,26 @@ export class TokenService implements ITokenService {
 
 		const token = await TokenModel.create({ user: userId, refreshToken });
 		return token;
+	}
+
+	async removeToken(refreshToken: string): Promise<void> {
+		await TokenModel.deleteOne({ refreshToken });
+	}
+
+	async refreshToken(refreshToken: string): Promise<void> {
+		const tokenData = TokenModel.findOne({ refreshToken });
+	}
+
+	validateRefreshToken(refreshToken: string): string | JwtPayload | null {
+		try {
+			return jwt.verify(refreshToken, this.configService.get('JWT_REFRESH_SECRET'));
+		} catch (e) {
+			return null;
+		}
+	}
+
+	async findRefreshToken(refreshToken: string): Promise<string> {
+		const tokenData = await TokenModel.findOne({ refreshToken });
+		return tokenData;
 	}
 }
