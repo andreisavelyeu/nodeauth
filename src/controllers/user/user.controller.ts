@@ -28,7 +28,7 @@ export class UserController extends BaseController implements IUserController {
 			},
 			{ path: '/login', method: 'post', func: this.login },
 			{ path: '/logout', method: 'post', func: this.logout },
-			{ path: '/users', method: 'get', func: this.getUsers },
+			{ path: '/get-all', method: 'get', func: this.getUsers },
 			{ path: '/activate/:link', method: 'get', func: this.activate },
 			{ path: '/refresh-token', method: 'get', func: this.refreshToken },
 		]);
@@ -108,7 +108,12 @@ export class UserController extends BaseController implements IUserController {
 		}
 	}
 
-	getUsers({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		this.send(res, 200, { hello: 'hello' });
+	async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+		try {
+			const users = await this.userService.getAllUsers();
+			this.send(res, 200, users);
+		} catch (e) {
+			next(e);
+		}
 	}
 }

@@ -11,8 +11,8 @@ import { ITokenService } from '../token/token.service.interface';
 import { UserEntity } from './user.entity';
 import { IConfig } from '../config/config.service.interface';
 import { HTTPError } from '../../exceptions/http-error.class';
-import userModel from '../../models/user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
+import { IUserModel } from '../../models/user/user.model.interface';
 
 @injectable()
 export class UserService implements IUserService {
@@ -125,5 +125,11 @@ export class UserService implements IUserService {
 			...tokens,
 			user: userEntity,
 		};
+	}
+
+	async getAllUsers(): Promise<UserEntity[]> {
+		const users = await UserModel.find();
+		const userEntities = users.map((user) => new UserEntity(user));
+		return userEntities;
 	}
 }
