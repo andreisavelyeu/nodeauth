@@ -57,6 +57,14 @@ export class TokenService implements ITokenService {
 		}
 	}
 
+	validateAccessToken(accessToken: string): string | JwtPayload | null {
+		try {
+			return jwt.verify(accessToken, this.configService.get('JWT_ACCESS_SECRET'));
+		} catch (e) {
+			return null;
+		}
+	}
+
 	async findRefreshToken(refreshToken: string): Promise<string> {
 		const tokenData = await TokenModel.findOne({ refreshToken });
 		return tokenData;

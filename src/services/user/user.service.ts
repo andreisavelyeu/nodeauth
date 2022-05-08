@@ -12,7 +12,6 @@ import { UserEntity } from './user.entity';
 import { IConfig } from '../config/config.service.interface';
 import { HTTPError } from '../../exceptions/http-error.class';
 import { JwtPayload } from 'jsonwebtoken';
-import { IUserModel } from '../../models/user/user.model.interface';
 
 @injectable()
 export class UserService implements IUserService {

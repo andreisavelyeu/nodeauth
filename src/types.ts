@@ -9,4 +9,5 @@ export const TYPES = {
 	IMailService: Symbol.for('IMailService'),
 	ITokenService: Symbol.for('ITokenService'),
 	IExceptionFilter: Symbol.for('IExceptionFilter'),
+	AuthMiddleware: Symbol.for('AuthMiddleware'),
 };

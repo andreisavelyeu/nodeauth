@@ -11,6 +11,7 @@ import { ILogger } from './services/logger/logger.interface';
 import { TYPES } from './types';
 import { MongoService } from './services/mongo/mongo.service';
 import { IExceptionFilter } from './exceptions/exception.filter.interface';
+import { AuthMiddleware } from './middlewares/auth/auth.middleware';
 
 @injectable()
 export class App {
@@ -24,6 +25,7 @@ export class App {
 		@inject(TYPES.UserController) private userController: UserController,
 		@inject(TYPES.IMongoService) private mongoService: MongoService,
 		@inject(TYPES.IExceptionFilter) private exceptionFilter: IExceptionFilter,
+		@inject(TYPES.AuthMiddleware) private authMiddleware: AuthMiddleware,
 	) {
 		this.app = express();
 		this.port = Number(this.config.get('PORT')) || 5000;
@@ -33,6 +35,7 @@ export class App {
 		this.app.use(json());
 		this.app.use(cookieParser());
 		this.app.use(cors());
+		this.app.use(this.authMiddleware.run.bind(this.authMiddleware));
 	}
 
 	useRoutes(): void {

@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { BaseController } from '../base/base.controller';
 import { IUserController } from './user.controller.interface';
 import { ValidateMiddleware } from '../../middlewares/validate/validate.middleware';
+import { AuthGuard } from '../../middlewares/auth/auth.guard';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { IUserService } from '../../services/user/user.service.interface';
@@ -28,7 +29,12 @@ export class UserController extends BaseController implements IUserController {
 			},
 			{ path: '/login', method: 'post', func: this.login },
 			{ path: '/logout', method: 'post', func: this.logout },
-			{ path: '/get-all', method: 'get', func: this.getUsers },
+			{
+				path: '/get-all',
+				method: 'get',
+				func: this.getUsers,
+				middlewares: [new AuthGuard()],
+			},
 			{ path: '/activate/:link', method: 'get', func: this.activate },
 			{ path: '/refresh-token', method: 'get', func: this.refreshToken },
 		]);

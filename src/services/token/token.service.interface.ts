@@ -10,5 +10,6 @@ export interface ITokenService {
 	removeToken(refreshToken: string): Promise<void>;
 	refreshToken(refreshToken: string): Promise<void>;
 	validateRefreshToken(refreshToken: string): string | JwtPayload | null;
+	validateAccessToken(accessToken: string): string | JwtPayload | null;
 	findRefreshToken(token: string): Promise<string>;
 }
